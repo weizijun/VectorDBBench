@@ -82,13 +82,13 @@ pip install vectordb-bench
 
 ```bash
 # 使用 HNSW 索引运行基准测试
-vectordb-bench AliyunElasticsearchHNSW \
+vectordbbench AliyunElasticsearchHNSW \
     --host your-es-host.aliyuncs.com \
     --port 9200 \
     --password your-password
 
 # 使用 HTTPS 连接
-vectordb-bench AliyunElasticsearchHNSW \
+vectordbbench AliyunElasticsearchHNSW \
     --scheme https \
     --host your-es-host.aliyuncs.com \
     --port 9200 \
@@ -96,13 +96,13 @@ vectordb-bench AliyunElasticsearchHNSW \
     --password your-password
 
 # 自定义索引名称
-vectordb-bench AliyunElasticsearchHNSW \
+vectordbbench AliyunElasticsearchHNSW \
     --host your-es-host.aliyuncs.com \
     --password your-password \
     --indice my_custom_index
 
 # 使用 Int8 量化索引
-vectordb-bench AliyunElasticsearchHNSWInt8 \
+vectordbbench AliyunElasticsearchHNSWInt8 \
     --host your-es-host.aliyuncs.com \
     --password your-password \
     --m 32 \
@@ -113,14 +113,14 @@ vectordb-bench AliyunElasticsearchHNSWInt8 \
 
 ```bash
 # 使用特定测试用例
-vectordb-bench AliyunElasticsearchHNSW \
+vectordbbench AliyunElasticsearchHNSW \
     --host your-es-host.aliyuncs.com \
     --password your-password \
     --case-type Performance768D500K \
     --db-label "my-benchmark-test"
 
 # 跳过数据加载，只执行搜索测试
-vectordb-bench AliyunElasticsearchHNSW \
+vectordbbench AliyunElasticsearchHNSW \
     --host your-es-host.aliyuncs.com \
     --password your-password \
     --skip-load \
@@ -131,7 +131,7 @@ vectordb-bench AliyunElasticsearchHNSW \
 
 ```bash
 # 自定义分片和 HNSW 参数
-vectordb-bench AliyunElasticsearchHNSW \
+vectordbbench AliyunElasticsearchHNSW \
     --host your-es-host.aliyuncs.com \
     --password your-password \
     --number-of-shards 3 \
@@ -142,7 +142,7 @@ vectordb-bench AliyunElasticsearchHNSW \
     --refresh-interval 60s
 
 # 使用重打分功能
-vectordb-bench AliyunElasticsearchHNSW \
+vectordbbench AliyunElasticsearchHNSW \
     --host your-es-host.aliyuncs.com \
     --password your-password \
     --use-rescore \
@@ -170,14 +170,14 @@ AliyunElasticsearchHNSW:
 使用配置文件运行:
 
 ```bash
-vectordb-bench AliyunElasticsearchHNSW --config-file aliyun_es_config.yml
+vectordbbench AliyunElasticsearchHNSW --config-file aliyun_es_config.yml
 ```
 
 ### 仅查看配置（Dry Run）
 
 ```bash
 # 打印配置但不执行
-vectordb-bench AliyunElasticsearchHNSW \
+vectordbbench AliyunElasticsearchHNSW \
     --host your-es-host.aliyuncs.com \
     --password your-password \
     --dry-run
@@ -206,8 +206,8 @@ vectordb-bench AliyunElasticsearchHNSW \
 
 ```bash
 # 查看所有可用命令
-vectordb-bench --help
+vectordbbench --help
 
 # 查看特定命令的帮助
-vectordb-bench AliyunElasticsearchHNSW --help
+vectordbbench AliyunElasticsearchHNSW --help
 ```

@@ -1,4 +1,10 @@
 from ..backend.clients.alisql.cli import AliSQLHNSW
+from ..backend.clients.aliyun_elasticsearch.cli import (
+    AliyunElasticsearchHNSW,
+    AliyunElasticsearchHNSWBBQ,
+    AliyunElasticsearchHNSWInt4,
+    AliyunElasticsearchHNSWInt8,
+)
 from ..backend.clients.alloydb.cli import AlloyDBScaNN
 from ..backend.clients.aws_opensearch.cli import AWSOpenSearch
 from ..backend.clients.chroma.cli import Chroma
@@ -74,6 +80,10 @@ cli.add_command(ElasticCloudHNSW)
 cli.add_command(ElasticCloudHNSWInt8)
 cli.add_command(ElasticCloudHNSWInt4)
 cli.add_command(ElasticCloudHNSWBBQ)
+cli.add_command(AliyunElasticsearchHNSW)
+cli.add_command(AliyunElasticsearchHNSWInt8)
+cli.add_command(AliyunElasticsearchHNSWInt4)
+cli.add_command(AliyunElasticsearchHNSWBBQ)
 cli.add_command(BatchCli)
 cli.add_command(S3Vectors)
 cli.add_command(TencentElasticsearch)
