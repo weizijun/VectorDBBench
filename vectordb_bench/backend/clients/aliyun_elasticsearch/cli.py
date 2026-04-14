@@ -81,6 +81,17 @@ class AliyunElasticsearchTypedDict(TypedDict):
             required=True,
         ),
     ]
+    indice: Annotated[
+        str,
+        click.option(
+            "--indice",
+            type=str,
+            help="Elasticsearch index name (must be lowercase)",
+            required=False,
+            default="vdb_bench_indice",
+            show_default=True,
+        ),
+    ]
 
 
 class AliyunElasticsearchHNSWTypedDict(CommonTypedDict, AliyunElasticsearchTypedDict, ElasticCloudTypedDict):
@@ -112,6 +123,7 @@ def AliyunElasticsearchHNSW(**parameters: Unpack[AliyunElasticsearchHNSWTypedDic
             port=parameters["port"],
             user=parameters["user"],
             password=SecretStr(parameters["password"]),
+            indice=parameters["indice"],
         ),
         db_case_config=ElasticCloudIndexConfig(
             index=IndexType.ES_HNSW,
@@ -149,6 +161,7 @@ def AliyunElasticsearchHNSWInt8(**parameters: Unpack[AliyunElasticsearchHNSWType
             port=parameters["port"],
             user=parameters["user"],
             password=SecretStr(parameters["password"]),
+            indice=parameters["indice"],
         ),
         db_case_config=ElasticCloudIndexConfig(
             index=IndexType.ES_HNSW_INT8,
@@ -186,6 +199,7 @@ def AliyunElasticsearchHNSWInt4(**parameters: Unpack[AliyunElasticsearchHNSWType
             port=parameters["port"],
             user=parameters["user"],
             password=SecretStr(parameters["password"]),
+            indice=parameters["indice"],
         ),
         db_case_config=ElasticCloudIndexConfig(
             index=IndexType.ES_HNSW_INT4,
@@ -223,6 +237,7 @@ def AliyunElasticsearchHNSWBBQ(**parameters: Unpack[AliyunElasticsearchHNSWTyped
             port=parameters["port"],
             user=parameters["user"],
             password=SecretStr(parameters["password"]),
+            indice=parameters["indice"],
         ),
         db_case_config=ElasticCloudIndexConfig(
             index=IndexType.ES_HNSW_BBQ,
