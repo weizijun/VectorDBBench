@@ -14,15 +14,9 @@ from vectordb_bench.cli.cli import (
 DBTYPE = DB.ElasticCloud
 
 
-class ElasticCloudTypedDict(TypedDict):
-    cloud_id: Annotated[
-        str,
-        click.option("--cloud-id", type=str, help="Elastic Cloud ID", required=True),
-    ]
-    password: Annotated[
-        str,
-        click.option("--password", type=str, help="Elastic Cloud password", required=True),
-    ]
+class ElasticCloudIndexTypedDict(TypedDict):
+    """Index configuration parameters shared across ElasticCloud and Aliyun Elasticsearch."""
+
     number_of_shards: Annotated[
         int,
         click.option(
@@ -113,7 +107,22 @@ class ElasticCloudTypedDict(TypedDict):
     ]
 
 
-class ElasticCloudHNSWTypedDict(CommonTypedDict, ElasticCloudTypedDict):
+class ElasticCloudTypedDict(TypedDict):
+    """Connection parameters specific to ElasticCloud (cloud_id + password)."""
+
+    cloud_id: Annotated[
+        str,
+        click.option("--cloud-id", type=str, help="Elastic Cloud ID", required=True),
+    ]
+    password: Annotated[
+        str,
+        click.option("--password", type=str, help="Elastic Cloud password", required=True),
+    ]
+
+
+class ElasticCloudHNSWParamsTypedDict(TypedDict):
+    """HNSW algorithm parameters shared across ElasticCloud variants."""
+
     m: Annotated[
         int,
         click.option(
@@ -158,6 +167,10 @@ class ElasticCloudHNSWTypedDict(CommonTypedDict, ElasticCloudTypedDict):
             show_default=True,
         ),
     ]
+
+
+class ElasticCloudHNSWTypedDict(CommonTypedDict, ElasticCloudTypedDict, ElasticCloudIndexTypedDict, ElasticCloudHNSWParamsTypedDict):
+    pass
 
 
 @cli.command()

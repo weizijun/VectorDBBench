@@ -17,7 +17,8 @@ from vectordb_bench.cli.cli import (
     run,
 )
 from vectordb_bench.backend.clients.elastic_cloud.cli import (
-    ElasticCloudTypedDict,
+    ElasticCloudHNSWParamsTypedDict,
+    ElasticCloudIndexTypedDict,
 )
 
 DBTYPE = DB.AliyunElasticsearch
@@ -94,7 +95,7 @@ class AliyunElasticsearchTypedDict(TypedDict):
     ]
 
 
-class AliyunElasticsearchHNSWTypedDict(CommonTypedDict, AliyunElasticsearchTypedDict, ElasticCloudTypedDict):
+class AliyunElasticsearchHNSWTypedDict(CommonTypedDict, AliyunElasticsearchTypedDict, ElasticCloudIndexTypedDict, ElasticCloudHNSWParamsTypedDict):
     """Full parameter set for Aliyun Elasticsearch HNSW index.
 
     Inherits:
