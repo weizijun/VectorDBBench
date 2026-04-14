@@ -10,15 +10,15 @@ import click
 from pydantic import SecretStr
 
 from vectordb_bench.backend.clients import DB
+from vectordb_bench.backend.clients.elastic_cloud.cli import (
+    ElasticCloudHNSWParamsTypedDict,
+    ElasticCloudIndexTypedDict,
+)
 from vectordb_bench.cli.cli import (
     CommonTypedDict,
     cli,
     click_parameter_decorators_from_typed_dict,
     run,
-)
-from vectordb_bench.backend.clients.elastic_cloud.cli import (
-    ElasticCloudHNSWParamsTypedDict,
-    ElasticCloudIndexTypedDict,
 )
 
 DBTYPE = DB.AliyunElasticsearch
@@ -95,16 +95,20 @@ class AliyunElasticsearchTypedDict(TypedDict):
     ]
 
 
-class AliyunElasticsearchHNSWTypedDict(CommonTypedDict, AliyunElasticsearchTypedDict, ElasticCloudIndexTypedDict, ElasticCloudHNSWParamsTypedDict):
+class AliyunElasticsearchHNSWTypedDict(
+    CommonTypedDict,
+    AliyunElasticsearchTypedDict,
+    ElasticCloudIndexTypedDict,
+    ElasticCloudHNSWParamsTypedDict,
+):
     """Full parameter set for Aliyun Elasticsearch HNSW index.
 
     Inherits:
     - CommonTypedDict: Common benchmark parameters (case_type, k, etc.)
     - AliyunElasticsearchTypedDict: Connection parameters (host, port, etc.)
-    - ElasticCloudTypedDict: Index parameters (shards, replicas, HNSW settings, etc.)
+    - ElasticCloudIndexTypedDict: Index parameters (shards, replicas, etc.)
+    - ElasticCloudHNSWParamsTypedDict: HNSW algorithm parameters (m, ef_construction, etc.)
     """
-
-    pass
 
 
 @cli.command()
@@ -140,6 +144,7 @@ def AliyunElasticsearchHNSW(**parameters: Unpack[AliyunElasticsearchHNSWTypedDic
             use_routing=parameters["use_routing"],
             use_rescore=parameters["use_rescore"],
             oversample_ratio=parameters["oversample_ratio"],
+            number_of_indexing_clients=parameters["number_of_indexing_clients"],
         ),
         **parameters,
     )
@@ -178,6 +183,7 @@ def AliyunElasticsearchHNSWInt8(**parameters: Unpack[AliyunElasticsearchHNSWType
             use_routing=parameters["use_routing"],
             use_rescore=parameters["use_rescore"],
             oversample_ratio=parameters["oversample_ratio"],
+            number_of_indexing_clients=parameters["number_of_indexing_clients"],
         ),
         **parameters,
     )
@@ -216,6 +222,7 @@ def AliyunElasticsearchHNSWInt4(**parameters: Unpack[AliyunElasticsearchHNSWType
             use_routing=parameters["use_routing"],
             use_rescore=parameters["use_rescore"],
             oversample_ratio=parameters["oversample_ratio"],
+            number_of_indexing_clients=parameters["number_of_indexing_clients"],
         ),
         **parameters,
     )
@@ -254,6 +261,7 @@ def AliyunElasticsearchHNSWBBQ(**parameters: Unpack[AliyunElasticsearchHNSWTyped
             use_routing=parameters["use_routing"],
             use_rescore=parameters["use_rescore"],
             oversample_ratio=parameters["oversample_ratio"],
+            number_of_indexing_clients=parameters["number_of_indexing_clients"],
         ),
         **parameters,
     )

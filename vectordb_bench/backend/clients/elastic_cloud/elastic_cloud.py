@@ -1,9 +1,7 @@
 import logging
 import time
 from collections.abc import Iterable
-from contextlib import contextmanager
-
-from elasticsearch.helpers import bulk
+from contextlib import contextmanager, suppress
 
 from vectordb_bench.backend.filter import Filter, FilterOp
 
@@ -106,8 +104,19 @@ class ElasticCloud(VectorDB):
         """Insert the embeddings to the elasticsearch."""
         assert self.client is not None, "should self.init() first"
 
-        insert_data = (
-            [
+        num_clients = self.case_config.number_of_indexing_clients or 1
+        if num_clients <= 1:
+            return self._insert_with_single_client(embeddings, metadata, labels_data)
+        return self._insert_with_multiple_clients(embeddings, metadata, num_clients, labels_data)
+
+    def _build_insert_data(
+        self,
+        embeddings: Iterable[list[float]],
+        metadata: list[int],
+        labels_data: list[str] | None = None,
+    ) -> list[dict]:
+        if self.with_scalar_labels:
+            return [
                 (
                     {
                         "_index": self.indice,
@@ -130,24 +139,99 @@ class ElasticCloud(VectorDB):
                 )
                 for i in range(len(embeddings))
             ]
-            if self.with_scalar_labels
-            else [
-                {
-                    "_index": self.indice,
-                    "_source": {
-                        self.id_col_name: metadata[i],
-                        self.vector_col_name: embeddings[i],
-                    },
-                }
-                for i in range(len(embeddings))
-            ]
-        )
+        return [
+            {
+                "_index": self.indice,
+                "_source": {
+                    self.id_col_name: metadata[i],
+                    self.vector_col_name: embeddings[i],
+                },
+            }
+            for i in range(len(embeddings))
+        ]
+
+    def _insert_with_single_client(
+        self,
+        embeddings: Iterable[list[float]],
+        metadata: list[int],
+        labels_data: list[str] | None = None,
+    ) -> tuple[int, Exception]:
+        from elasticsearch.helpers import bulk
+
+        insert_data = self._build_insert_data(embeddings, metadata, labels_data)
         try:
             bulk_insert_res = bulk(self.client, insert_data)
             return (bulk_insert_res[0], None)
         except Exception as e:
             log.warning(f"Failed to insert data: {self.indice} error: {e!s}")
             return (0, e)
+
+    def _insert_with_multiple_clients(
+        self,
+        embeddings: Iterable[list[float]],
+        metadata: list[int],
+        num_clients: int,
+        labels_data: list[str] | None = None,
+    ) -> tuple[int, Exception]:
+        import concurrent.futures
+        from concurrent.futures import ThreadPoolExecutor
+
+        from elasticsearch import Elasticsearch
+
+        embeddings_list = list(embeddings)
+        chunk_size = max(1, len(embeddings_list) // num_clients)
+        chunks = []
+
+        for i in range(0, len(embeddings_list), chunk_size):
+            end = min(i + chunk_size, len(embeddings_list))
+            chunk_labels = labels_data[i:end] if labels_data is not None else None
+            chunks.append((embeddings_list[i:end], metadata[i:end], chunk_labels))
+
+        clients = [Elasticsearch(**self.db_config, request_timeout=180) for _ in range(min(num_clients, len(chunks)))]
+        log.info(f"Elasticsearch using {len(clients)} parallel clients for data insertion")
+
+        def insert_chunk(client_idx: int, chunk_idx: int):
+            from elasticsearch.helpers import bulk
+
+            chunk_embeddings, chunk_metadata, chunk_labels_data = chunks[chunk_idx]
+            client = clients[client_idx]
+            insert_data = self._build_insert_data(chunk_embeddings, chunk_metadata, chunk_labels_data)
+
+            max_retries = 10
+            for attempt in range(max_retries):
+                try:
+                    bulk_res = bulk(client, insert_data)
+                    return bulk_res[0], None
+                except Exception as e:
+                    if "429" in str(e) and attempt < max_retries - 1:
+                        log.warning(f"Client {client_idx} got 429 error, retry {attempt + 1}/{max_retries} after 10s")
+                        time.sleep(10)
+                    else:
+                        log.warning(f"Client {client_idx} failed to insert data: {e!s}")
+                        return 0, e
+            return 0, Exception("Max retries exceeded")
+
+        results = []
+        with ThreadPoolExecutor(max_workers=len(clients)) as executor:
+            futures = []
+            for chunk_idx in range(len(chunks)):
+                client_idx = chunk_idx % len(clients)
+                futures.append(executor.submit(insert_chunk, client_idx, chunk_idx))
+            for future in concurrent.futures.as_completed(futures):
+                results.append(future.result())
+
+        for client in clients:
+            with suppress(Exception):
+                client.close()
+
+        total_count = sum(count for count, _ in results)
+        errors = [error for _, error in results if error is not None]
+
+        if errors:
+            log.warning(f"Some clients failed during parallel insertion: {errors}")
+            return self._insert_with_single_client(embeddings, metadata, labels_data)
+
+        return (total_count, None)
 
     def prepare_filter(self, filters: Filter):
         self.routing_key = None

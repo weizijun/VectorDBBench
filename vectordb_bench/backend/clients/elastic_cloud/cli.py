@@ -105,6 +105,17 @@ class ElasticCloudIndexTypedDict(TypedDict):
             show_default=True,
         ),
     ]
+    number_of_indexing_clients: Annotated[
+        int,
+        click.option(
+            "--number-of-indexing-clients",
+            type=int,
+            help="Number of parallel clients for data insertion (1 = single-threaded)",
+            required=False,
+            default=1,
+            show_default=True,
+        ),
+    ]
 
 
 class ElasticCloudTypedDict(TypedDict):
@@ -169,7 +180,12 @@ class ElasticCloudHNSWParamsTypedDict(TypedDict):
     ]
 
 
-class ElasticCloudHNSWTypedDict(CommonTypedDict, ElasticCloudTypedDict, ElasticCloudIndexTypedDict, ElasticCloudHNSWParamsTypedDict):
+class ElasticCloudHNSWTypedDict(
+    CommonTypedDict,
+    ElasticCloudTypedDict,
+    ElasticCloudIndexTypedDict,
+    ElasticCloudHNSWParamsTypedDict,
+):
     pass
 
 
@@ -200,6 +216,7 @@ def ElasticCloudHNSW(**parameters: Unpack[ElasticCloudHNSWTypedDict]):
             use_routing=parameters["use_routing"],
             use_rescore=parameters["use_rescore"],
             oversample_ratio=parameters["oversample_ratio"],
+            number_of_indexing_clients=parameters["number_of_indexing_clients"],
         ),
         **parameters,
     )
@@ -232,6 +249,7 @@ def ElasticCloudHNSWInt8(**parameters: Unpack[ElasticCloudHNSWTypedDict]):
             use_routing=parameters["use_routing"],
             use_rescore=parameters["use_rescore"],
             oversample_ratio=parameters["oversample_ratio"],
+            number_of_indexing_clients=parameters["number_of_indexing_clients"],
         ),
         **parameters,
     )
@@ -264,6 +282,7 @@ def ElasticCloudHNSWInt4(**parameters: Unpack[ElasticCloudHNSWTypedDict]):
             use_routing=parameters["use_routing"],
             use_rescore=parameters["use_rescore"],
             oversample_ratio=parameters["oversample_ratio"],
+            number_of_indexing_clients=parameters["number_of_indexing_clients"],
         ),
         **parameters,
     )
@@ -296,6 +315,7 @@ def ElasticCloudHNSWBBQ(**parameters: Unpack[ElasticCloudHNSWTypedDict]):
             use_routing=parameters["use_routing"],
             use_rescore=parameters["use_rescore"],
             oversample_ratio=parameters["oversample_ratio"],
+            number_of_indexing_clients=parameters["number_of_indexing_clients"],
         ),
         **parameters,
     )
